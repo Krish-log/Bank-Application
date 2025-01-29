@@ -1,5 +1,3 @@
-package practice;
-
 import java.util.*;
 
 class Users {
@@ -119,15 +117,6 @@ class Accounts extends Users {
     public HashMap<Integer, User> getAccountMap() {
         return accountMap;
     }
-
-    public static void main(String[] args) {
-        Accounts accounts = new Accounts();
-        User user = accounts.new User();
-        Account account = accounts.new Account(user);
-
-        BankApp bankApp = new BankApp(account);
-        bankApp.performBankingOperations();
-    }
 }
 
 class BankApp {
@@ -232,5 +221,16 @@ class BankApp {
                     System.out.println("Invalid choice. Please try again.");
             }
         }
+    }
+}
+
+public class BankApplication {
+    public static void main(String[] args) {
+        Accounts accounts = new Accounts();
+        Users.User user = accounts.new User();
+        Accounts.Account account = accounts.new Account(user);
+
+        BankApp bankApp = new BankApp(account);
+        bankApp.performBankingOperations();
     }
 }
