@@ -13,7 +13,7 @@ class Users {
 
         private static final String USERS_JSON_FILE = "Users.json";
         private static List<User> userList = loadUsersFromJson();
-        private Scanner sc = new Scanner(System.in);
+        private Scanner sc;
 
         public User(String userId, String firstName, String lastName, String password, String userAddress, long mobileNumber, String userDOB) {
             this.userId = userId;
@@ -28,38 +28,81 @@ class Users {
 
         public User() {
             Random random = new Random();
-
+            sc = new Scanner(System.in);
+            Console console = System.console();
+            
             System.out.println("\t\t\tWELCOME TO OUR BANK");
             System.out.println("==============================================\n");
-
+            
             System.out.println("Are you an existing user? (Y/N): ");
             char isExistingUser = sc.next().charAt(0);
-            sc.nextLine();
-
+            
             if (isExistingUser == 'Y' || isExistingUser == 'y') {
-                System.out.print("Enter your User ID: ");
-                String enteredUserId = sc.nextLine().trim();
+                int attempts = 3;
+                boolean isAuthenticated = false;
+                User existingUser = null;
+            
+                for(int i = 0; i < attempts; i++) {
+                    System.out.println("\nPlease provide credentials to login.");
+                    System.out.print("Enter UserID: ");
+                    String enteredUserId = sc.nextLine().trim();
+                    System.out.print("Enter Password: ");
+                    String enteredPassword;
+                    
+                    // Secure password input
+                    if (console != null) {
+                        enteredPassword = new String(console.readPassword());
+                    } else {
+                        enteredPassword = sc.nextLine(); // Fallback for Windows
+                    }
+            
+                    // Find user in the system
+                    existingUser = findUserById(enteredUserId);
 
-                User existingUser = findUserById(enteredUserId);
-                if (existingUser != null) {
-                    System.out.println("Welcome back, " + existingUser.getUserFirstName() + " " + existingUser.getUserLastName() + "!");
-                    
-                    // Copy the retrieved user's data into the current object
-                    this.userId = existingUser.getUserId();
-                    this.firstName = existingUser.getUserFirstName();
-                    this.lastName = existingUser.getUserLastName();
-                    this.password = existingUser.getPassword();
-                    this.mobileNumber = existingUser.getUserPhoneNumber();
-                    this.userAddress = existingUser.getUserAddress();
-                    this.userDOB = existingUser.getUserDOB();
-                    
-                    displayUserDetails(this);
-                } else {
-                    System.out.println("User not found.");
-                    registerNewUser(random);
+                    // Check if user exists and password matches
+                    if (existingUser != null && existingUser.password.equals(enteredPassword)) {
+                        isAuthenticated = true;
+                        break;  // Exit loop if authentication is successful
+                    } else {
+                        attempts--;
+                        System.out.println("Incorrect Credentials. Attempts left: " + (attempts-1));
+                    }
                 }
-            }
-        }
+            
+                // If authentication fails after 3 attempts, exit
+                if (!isAuthenticated) {
+                    System.out.println("Too many failed attempts. Exiting...");
+                    System.exit(0);
+                }
+            
+                // ✅ Successful login
+                System.out.println("Welcome back, " + existingUser.getUserFirstName() + " " + existingUser.getUserLastName() + "!");
+            
+                // Copy user details to current user object
+                this.userId = existingUser.getUserId();
+                this.firstName = existingUser.getUserFirstName();
+                this.lastName = existingUser.getUserLastName();
+                this.password = existingUser.getPassword();
+                this.mobileNumber = existingUser.getUserPhoneNumber();
+                this.userAddress = existingUser.getUserAddress();
+                this.userDOB = existingUser.getUserDOB();
+            
+                // 🔍 Check if user has an account
+                Accounts accountsInstance = new Accounts();
+                Accounts.Account account = accountsInstance.findAccountByUser(this);
+
+                System.out.println(account);
+            
+                if (account != null) {
+                    account.displayAccountDetails();
+                } else {
+                    System.out.println("No account found for the user.");
+                    System.out.println("************************************\n");
+                }
+            } else {
+                registerNewUser(random);
+            }            
+        }                
 
         private void registerNewUser(Random random) {
             System.out.print("Would you like to register? (Y/N): ");
@@ -118,11 +161,6 @@ class Users {
         }
 
         public static User findUserById(String userId) {
-            
-            for (User user : userList) {
-                System.out.println("  - " + user.getUserId());
-            }
-        
             for (User user : userList) {
                 if (user.getUserId().equals(userId)) {
                     return user;
@@ -130,6 +168,8 @@ class Users {
             }
             return null;
         }
+        
+        
         
 
         public void displayUserDetails(User user) {
@@ -293,7 +333,7 @@ class Users {
 
 class Accounts extends Users {
     private static final String ACCOUNTS_JSON_FILE = "Accounts.json";
-    private static List<Account> accountList = loadAccountsFromJson();
+    private static List<Account> accountList = new ArrayList<>();
     Scanner sc = new Scanner(System.in);
 
     public class Account {
@@ -313,9 +353,16 @@ class Accounts extends Users {
             this.initialAmount = balance;
         }
 
+        static {
+            if (accountList == null) {
+                accountList = loadAccountsFromJson();
+            }
+        }
+
         public Account(User user) {
             Random random = new Random();
             this.user = user;
+            
 
             System.out.println("Would you like to create an account (Y / N)? : ");
             char isAcc = sc.next().charAt(0);
@@ -352,7 +399,7 @@ class Accounts extends Users {
                 Account acc = accountList.get(i);
                 writer.write("  {\n");
                 writer.write("    \"accNumber\": " + acc.accNumber + ",\n");
-                writer.write("    \"userId\": " + acc.user.getUserId() + ",\n");
+                writer.write("    \"userId\": \"" + acc.user.getUserId() + "\",\n");  // Explicitly store userId as a string
                 writer.write("    \"initialAmount\": " + acc.initialAmount + "\n");
                 writer.write("  }" + (i < accountList.size() - 1 ? "," : "") + "\n");
             }
@@ -361,19 +408,104 @@ class Accounts extends Users {
             e.printStackTrace();
         }
     }
+    
 
     private static List<Account> loadAccountsFromJson() {
-        return new ArrayList<>();
-    }
+        List<Account> accounts = new ArrayList<>();
+        File file = new File(ACCOUNTS_JSON_FILE);
+    
+        if (!file.exists()) {
+            return accounts; // Return empty list if file doesn't exist
+        }
+    
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            StringBuilder jsonContent = new StringBuilder();
+            String line;
+    
+            while ((line = reader.readLine()) != null) {
+                jsonContent.append(line.trim());
+            }
+    
+            String json = jsonContent.toString();
+            if (!json.startsWith("[") || !json.endsWith("]")) {
+                return accounts;
+            }
+    
+            json = json.substring(1, json.length() - 1).trim();
+            String[] accountEntries = json.split("},\\s*\\{");
+    
+            for (String accountEntry : accountEntries) {
+                accountEntry = accountEntry.trim();
+                if (accountEntry.isEmpty()) continue;
+    
+                accountEntry = "{" + accountEntry + "}";
+    
+                String accNumberStr = extractJsonValue(accountEntry, "accNumber");
+                String userId = extractJsonValue(accountEntry, "userId");
+                String initialAmountStr = extractJsonValue(accountEntry, "initialAmount");
+    
+                int accNumber = Integer.parseInt(accNumberStr);
+                double initialAmount = Double.parseDouble(initialAmountStr);
+    
+                User user = Users.User.findUserById(userId);
+                if (user == null) {
+                    continue;
+                }
+    
+                Accounts accountsInstance = new Accounts();
+                Account account = accountsInstance.new Account(user);
+                account.accNumber = accNumber;
+                account.initialAmount = initialAmount;
+                accounts.add(account);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    
+        return accounts;
+    }   
+        
+        /**
+         * Extracts a value from a JSON string.
+         */
+        private static String extractJsonValue(String json, String key) {
+            String searchKey = "\"" + key + "\":";
+            int startIndex = json.indexOf(searchKey);
+            
+            if (startIndex == -1) {
+                return ""; // Key not found
+            }
+    
+            startIndex += searchKey.length(); // Move index past the key
+    
+            // Find the first non-space and non-quote character
+            while (startIndex < json.length() && (json.charAt(startIndex) == ' ' || json.charAt(startIndex) == '\"')) {
+                startIndex++;
+            }
+    
+            // Identify the end of the value
+            int endIndex = startIndex;
+            while (endIndex < json.length() && json.charAt(endIndex) != ',' && json.charAt(endIndex) != '}') {
+                endIndex++;
+            }
+    
+            // Extract and return the value, trimming unnecessary characters
+            return json.substring(startIndex, endIndex).replace("\"", "").trim();
+        }
+    
 
     public Account findAccountByUser(User user) {
-        for (Account account : accountList) {
-            if (account.user.getUserId() == user.getUserId()) {
+    
+        for (Account account : accountList) {    
+            if (account.user.getUserId().equals(user.getUserId())) {
                 return account;
             }
         }
+    
+        System.out.println("No account found for the user!");
         return null;
     }
+    
 }
 
 
@@ -422,7 +554,7 @@ class BankApp {
 
     public void recordTransaction(String transactionType, double amount) {
         String transaction = String.format(
-                "Account ID: %d, User ID: %d, Type: %s, Amount: %.2f, Balance: %.2f",
+                "Account ID: %d, User ID: %s, Type: %s, Amount: %.2f, Balance: %.2f",
                 account.getAccNumber(),
                 account.user.getUserId(),
                 transactionType,
@@ -450,23 +582,26 @@ class BankApp {
 
             if (performTransaction == 'Y' || performTransaction == 'y') {
                 boolean exit = false;
-                while (!exit) {
-                    System.out.println("\nChoose an operation:");
-                    System.out.println("1. Deposit");
-                    System.out.println("2. Withdraw");
-                    System.out.println("3. Show Balance");
-                    System.out.println("4. Show Transaction History");
-                    System.out.println("5. Exit");
-                    System.out.print("Enter your choice: ");
-
-                    int choice = sc.nextInt();
-                    switch (choice) {
-                        case 1: deposit(); break;
-                        case 2: withdraw(); break;
-                        case 3: showBalance(); break;
-                        case 4: showTransactionHistory(); break;
-                        case 5: exit = true; System.out.println("Thank you!"); System.exit(0);
-                        default: System.out.println("Invalid choice."); 
+                try (Scanner sc = new Scanner(System.in)) {
+                    this.sc = sc;
+                    while (!exit) {
+                        System.out.println("\nChoose an operation:");
+                        System.out.println("1. Deposit");
+                        System.out.println("2. Withdraw");
+                        System.out.println("3. Show Balance");
+                        System.out.println("4. Show Transaction History");
+                        System.out.println("5. Exit");
+                        System.out.print("Enter your choice: ");
+        
+                        int choice = sc.nextInt();
+                        switch (choice) {
+                            case 1: deposit(); break;
+                            case 2: withdraw(); break;
+                            case 3: showBalance(); break;
+                            case 4: showTransactionHistory(); break;
+                            case 5: exit = true; System.out.println("Thank you!"); System.exit(0);
+                            default: System.out.println("Invalid choice."); 
+                        }
                     }
                 }
             } else {
@@ -497,8 +632,8 @@ class BankApp {
 
 public class BankApplication {
     public static void main(String[] args) {
-        Accounts accounts = new Accounts();
         Users.User user = new Users.User();
+        Accounts accounts = new Accounts();
         Accounts.Account account = accounts.findAccountByUser(user);
         if (account == null) {
             account = accounts.new Account(user);
