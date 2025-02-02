@@ -29,45 +29,43 @@ class Users {
         public User() {
             Random random = new Random();
             sc = new Scanner(System.in);
-            Console console = System.console();
+            //Console console = System.console();
             
             System.out.println("\t\t\tWELCOME TO OUR BANK");
             System.out.println("==============================================\n");
             
             System.out.println("Are you an existing user? (Y/N): ");
             char isExistingUser = sc.next().charAt(0);
+            sc.nextLine();  // Consume the leftover newline!
+
             
             if (isExistingUser == 'Y' || isExistingUser == 'y') {
                 int attempts = 3;
                 boolean isAuthenticated = false;
                 User existingUser = null;
             
-                for(int i = 0; i < attempts; i++) {
+                while (attempts > 0 && !isAuthenticated) {
                     System.out.println("\nPlease provide credentials to login.");
-                    System.out.print("Enter UserID: ");
-                    String enteredUserId = sc.nextLine().trim();
-                    System.out.print("Enter Password: ");
-                    String enteredPassword;
                     
-                    // Secure password input
-                    if (console != null) {
-                        enteredPassword = new String(console.readPassword());
-                    } else {
-                        enteredPassword = sc.nextLine(); // Fallback for Windows
-                    }
-            
-                    // Find user in the system
-                    existingUser = findUserById(enteredUserId);
+                    // Prompt for UserID and Password
+                    System.out.println("Enter UserID:");
+                    System.out.flush();
+                    String enteredUserId = sc.nextLine().trim();
 
-                    // Check if user exists and password matches
+                    System.out.println("Enter Password:");
+                    System.out.flush();
+                    String enteredPassword = sc.nextLine();
+                    
+                    // Attempt to authenticate
+                    existingUser = findUserById(enteredUserId);
                     if (existingUser != null && existingUser.password.equals(enteredPassword)) {
                         isAuthenticated = true;
-                        break;  // Exit loop if authentication is successful
+                        break;
                     } else {
                         attempts--;
-                        System.out.println("Incorrect Credentials. Attempts left: " + (attempts-1));
+                        System.out.println("Incorrect Credentials. Attempts left: " + attempts);
                     }
-                }
+                }                
             
                 // If authentication fails after 3 attempts, exit
                 if (!isAuthenticated) {
@@ -168,9 +166,6 @@ class Users {
             }
             return null;
         }
-        
-        
-        
 
         public void displayUserDetails(User user) {
             System.out.println("\nUSER DETAILS:");
@@ -297,9 +292,7 @@ class Users {
             }
             return users;
         }
-        
-                
-        
+
         /**
          * Extracts a value from a manually parsed JSON string.
          */
@@ -409,7 +402,6 @@ class Accounts extends Users {
         }
     }
     
-
     private static List<Account> loadAccountsFromJson() {
         List<Account> accounts = new ArrayList<>();
         File file = new File(ACCOUNTS_JSON_FILE);
@@ -507,7 +499,6 @@ class Accounts extends Users {
     }
     
 }
-
 
 class BankApp {
     private Accounts.Account account;
@@ -629,7 +620,6 @@ class BankApp {
         }
     }
 }
-
 public class BankApplication {
     public static void main(String[] args) {
         Users.User user = new Users.User();
