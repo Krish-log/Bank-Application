@@ -1,0 +1,20 @@
+[
+  {
+    "userId": "abc123",
+    "firstName": "Gopi",
+    "lastName": "Krishna",
+    "password": "Abc@1234",
+    "mobileNumber": "1234567890",
+    "userAddress": "Hyderabad, India",
+    "userDOB": "2000-01-30"
+  },
+  {
+    "userId": "Crazy123",
+    "firstName": "Crazy",
+    "lastName": "Krish",
+    "password": "Crazy@123",
+    "mobileNumber": "3859260191",
+    "userAddress": "Telangana, India",
+    "userDOB": "1998-01-01"
+  }
+]

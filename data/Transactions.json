@@ -1,0 +1,82 @@
+[
+  {
+    "date": "2025-02-05 15:17:07",
+    "userId": "Crazy123",
+    "accountId": 63680,
+    "type": "Credit",
+    "amount": 250.0,
+    "balance": 250.0
+  },
+  {
+    "date": "2025-02-05 15:17:12",
+    "userId": "Crazy123",
+    "accountId": 63680,
+    "type": "Credit",
+    "amount": 200.0,
+    "balance": 450.0
+  },
+  {
+    "date": "2025-02-05 15:17:14",
+    "userId": "Crazy123",
+    "accountId": 63680,
+    "type": "Debit",
+    "amount": 10.0,
+    "balance": 440.0
+  },
+  {
+    "date": "2025-02-05 15:17:17",
+    "userId": "Crazy123",
+    "accountId": 63680,
+    "type": "Debit",
+    "amount": 5.0,
+    "balance": 435.0
+  },
+  {
+    "date": "2025-02-05 16:07:08",
+    "userId": "abc123",
+    "accountId": 88144,
+    "type": "Credit",
+    "amount": 1000.0,
+    "balance": 1000.0
+  },
+  {
+    "date": "2025-02-05 16:07:12",
+    "userId": "abc123",
+    "accountId": 88144,
+    "type": "Debit",
+    "amount": 1.0,
+    "balance": 999.0
+  },
+  {
+    "date": "2025-02-05 16:41:01",
+    "userId": "abc123",
+    "accountId": 88144,
+    "type": "Credit",
+    "amount": 600.0,
+    "balance": 13493.0
+  },
+  {
+    "date": "2025-02-05 16:41:06",
+    "userId": "abc123",
+    "accountId": 88144,
+    "type": "Debit",
+    "amount": 5.0,
+    "balance": 13488.0
+  },
+  {
+    "date": "2025-02-05 16:41:10",
+    "userId": "abc123",
+    "accountId": 88144,
+    "type": "Credit",
+    "amount": 38749.0,
+    "balance": 52237.0
+  },
+  {
+    "date": "2025-02-05 16:41:16",
+    "userId": "abc123",
+    "accountId": 88144,
+    "type": "Debit",
+    "amount": 2971.0,
+    "balance": 49266.0
+  }
+]

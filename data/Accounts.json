@@ -1,0 +1,28 @@
+{
+  "abc123": {
+    "accNumber": 88144,
+    "user": {
+      "userId": "abc123",
+      "firstName": "Gopi",
+      "lastName": "Krishna",
+      "password": "Abc@1234",
+      "mobileNumber": "1234567890",
+      "userAddress": "Hyderabad, India",
+      "userDOB": "2000-01-30"
+    },
+    "balance": 49266.0
+  },
+  "Crazy123": {
+    "accNumber": 63680,
+    "user": {
+      "userId": "Crazy123",
+      "firstName": "Crazy",
+      "lastName": "Krish",
+      "password": "Crazy@123",
+      "mobileNumber": "3859260191",
+      "userAddress": "Telangana, India",
+      "userDOB": "1998-01-01"
+    },
+    "balance": 435.0
+  }
+}
